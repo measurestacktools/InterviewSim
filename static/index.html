@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InterviewSim — AI Interview Simulator</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="stage-dot"></span> INTERVIEW<span class="crimson">SIM</span></div>
+  <div class="top-right">
+    <span id="statusPill" class="pill off" title="Groq key status">● checking…</span>
+    <button id="settingsBtn" class="btn ghost">Settings</button>
+  </div>
+</header>
+
+<main class="stage">
+  <!-- SETUP -->
+  <section id="setupScreen" class="panel">
+    <div class="kicker">INTERVIEW STAGE · SETUP</div>
+    <h1>Configure your mock interview</h1>
+    <p class="sub">Real AI interviewer (Groq <code>openai/gpt-oss-120b</code>). Text answers only — voice is a known limitation.</p>
+    <div class="grid2">
+      <label>Topic
+        <select id="topic">
+          <option>Python</option><option>JavaScript</option><option>Java</option>
+          <option>C++</option><option>React</option><option>AI-ML</option>
+          <option>SQL</option><option>DSA</option><option>General</option>
+        </select>
+      </label>
+      <label>Difficulty
+        <select id="difficulty"><option>Junior</option><option>Mid</option><option>Senior</option></select>
+      </label>
+    </div>
+    <label>Questions
+      <div class="seg" id="countSeg">
+        <button data-n="3" class="on">3</button><button data-n="5">5</button><button data-n="8">8</button>
+      </div>
+    </label>
+    <div class="row">
+      <button id="startBtn" class="btn primary">▶ Start interview</button>
+    </div>
+    <div id="setupErr" class="err"></div>
+  </section>
+
+  <!-- INTERVIEW -->
+  <section id="interviewScreen" class="panel hidden">
+    <div class="meta-row">
+      <span id="progress" class="progress">Q1/3</span>
+      <span id="diffBadge" class="badge">Junior</span>
+      <span id="topicBadge" class="badge dim">Python</span>
+      <span id="timer" class="timer">00:00</span>
+      <span id="fuBadge" class="badge fu hidden">FOLLOW-UP</span>
+    </div>
+    <div class="bar"><div id="barFill"></div></div>
+    <div class="qcard"><div class="qkicker">QUESTION</div><div id="question">…</div></div>
+    <textarea id="answer" maxlength="2000" rows="6" placeholder="Type your answer here (max 2000 chars)…"></textarea>
+    <div class="row between">
+      <span id="charCount" class="dim">0 / 2000</span>
+      <div class="row">
+        <button id="quitBtn" class="btn danger-ghost">Quit (partial report)</button>
+        <button id="submitBtn" class="btn primary">Submit answer</button>
+      </div>
+    </div>
+    <div id="answerErr" class="err"></div>
+    <div id="evalCard" class="eval hidden">
+      <div class="eval-head"><div id="scoreRing" class="ring">–</div>
+        <div><div class="ekicker">EVALUATION</div><div id="feedback"></div></div>
+      </div>
+      <div class="grid2">
+        <div><h4>Strengths</h4><ul id="strengths"></ul></div>
+        <div><h4>Missing</h4><ul id="missing"></ul></div>
+      </div>
+      <div class="row"><button id="nextBtn" class="btn primary hidden">Next question →</button>
+      <button id="reportBtn" class="btn primary hidden">Get final report →</button></div>
+    </div>
+  </section>
+
+  <!-- REPORT -->
+  <section id="reportScreen" class="panel hidden">
+    <div class="kicker">PANEL DECISION · REPORT</div>
+    <h1>Interview report <span id="partialTag" class="badge dim hidden">PARTIAL</span></h1>
+    <div class="rep-top">
+      <div id="verdict" class="verdict">–</div>
+      <div class="overall"><span id="overall">–</span><small>overall / 100</small></div>
+    </div>
+    <div id="perQ" class="perq"></div>
+    <div class="grid2">
+      <div><h4>Concepts demonstrated</h4><ul id="rConcepts"></ul></div>
+      <div><h4>Missing concepts</h4><ul id="rMissing"></ul></div>
+    </div>
+    <h4>Study topics</h4><ul id="rStudy"></ul>
+    <h4>Stronger answer example</h4><pre id="rStrong" class="strong"></pre>
+    <div class="row">
+      <button id="copyBtn" class="btn ghost">Copy report</button>
+      <button id="printBtn" class="btn ghost">Print</button>
+      <button id="restartBtn" class="btn primary">↺ New interview</button>
+    </div>
+  </section>
+</main>
+
+<!-- SETTINGS MODAL -->
+<div id="settingsModal" class="modal hidden">
+  <div class="modal-box">
+    <h3>Settings — Groq API key</h3>
+    <p class="sub">Stored in server session memory only. Falls back to <code>.env</code> (<code>GROQ_API_KEY</code>). Verified via <code>models.list</code>.</p>
+    <input id="keyInput" type="password" placeholder="gsk_…" autocomplete="off">
+    <div class="row">
+      <button id="saveKeyBtn" class="btn primary">Verify &amp; save</button>
+      <button id="removeKeyBtn" class="btn danger-ghost">Remove</button>
+      <button id="closeSettingsBtn" class="btn ghost">Close</button>
+    </div>
+    <div id="keyMsg" class="err"></div>
+    <div id="keyState" class="dim"></div>
+  </div>
+</div>
+
+<footer class="foot">InterviewSim · port 8009 · model openai/gpt-oss-120b via Groq · text-only</footer>
+<script src="/static/app.js"></script>
+</body>
+</html>
