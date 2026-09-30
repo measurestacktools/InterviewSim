@@ -121,3 +121,60 @@ $("removeKeyBtn").onclick=async()=>{
   refreshStatus();refreshKeyState();
 };
 refreshStatus();setInterval(refreshStatus,30000);
+// voice input (browser SpeechRecognition only — no server, no key, no cost)
+// Text stays primary: dictation appends into #answer; user edits + submits manually.
+(function(){
+  const micBtn=$("micBtn"), micStatus=$("micStatus"), ans=$("answer");
+  if(!micBtn||!micStatus||!ans)return;
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  let rec=null, listening=false, baseText="", finalText="";
+  function setStatus(t){micStatus.textContent=t||"";}
+  function setBtn(){micBtn.textContent=listening?"⏺":"🎤";micBtn.classList.toggle("listening",listening);}
+  function updateCount(){ans.dispatchEvent(new Event("input"));}
+  function combined(finalPart,interimPart){
+    const add=(finalPart+" "+interimPart).trim();
+    if(!add)return baseText;
+    const sep=baseText&&!/\s$/.test(baseText)?" ":("");
+    return (baseText+sep+add).slice(0,2000);
+  }
+  if(!SR){
+    micBtn.onclick=()=>setStatus("Voice input not supported in this browser (e.g. Firefox) — please type your answer instead.");
+    return;
+  }
+  micBtn.onclick=()=>{
+    if(listening){try{rec&&rec.stop();}catch{}return;} // onend finalizes
+    baseText=ans.value||"";finalText="";
+    try{
+      rec=new SR();
+    }catch{setStatus("Could not start voice input — please type instead.");return;}
+    rec.lang="en-US";rec.interimResults=true;rec.continuous=true;rec.maxAlternatives=1;
+    listening=true;setBtn();setStatus("Listening… speak now. Tap ⏺ again to stop.");
+    rec.onresult=e=>{
+      let interim="";
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        const r=e.results[i];
+        if(r.isFinal)finalText=(finalText+" "+r[0].transcript).trim();
+        else interim+=r[0].transcript;
+      }
+      ans.value=combined(finalText,interim);updateCount();
+    };
+    rec.onerror=e=>{
+      const c=(e&&e.error)||"";
+      if(c==="not-allowed"||c==="service-not-allowed")setStatus("Microphone denied — allow mic access in the browser, then retry (or type instead).");
+      else if(c==="audio-capture")setStatus("No microphone found — check your device, or type instead.");
+      else if(c==="no-speech")setStatus("No speech detected — try again, or type instead.");
+      else if(c==="network")setStatus("Speech service unavailable (network) — type instead.");
+      else if(c==="aborted")setStatus("Voice stopped — partial text kept; edit before submitting.");
+      else setStatus("Voice error ("+(c||"unknown")+") — partial text kept; edit or type instead.");
+    };
+    rec.onend=()=>{
+      listening=false;setBtn();
+      const done=combined(finalText,"");
+      if(finalText){ans.value=done;updateCount();setStatus("Voice added — review/edit, then Submit answer.");}
+      else if(!/denied|No microphone|unavailable|detected|error|stopped/i.test(micStatus.textContent))
+        setStatus("Empty result — nothing heard. Try again, or type instead.");
+      try{ans.focus();}catch{}
+    };
+    try{rec.start();}catch{listening=false;setBtn();setStatus("Could not start voice input — please type instead.");}
+  };
+})();

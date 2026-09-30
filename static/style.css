@@ -16,6 +16,12 @@ label{display:block;margin:12px 0;font-size:14px}select,textarea,input{width:100
 .bar{height:8px;background:#0007;border-radius:99px;margin:12px 0;overflow:hidden}.bar div{height:100%;width:0;background:linear-gradient(90deg,var(--crim),var(--crim2));transition:width .4s}
 .qcard{background:#100c0e;border-left:4px solid var(--crim);border-radius:10px;padding:16px;margin:8px 0 12px;font-size:17px;line-height:1.5}.qkicker,.ekicker{font-size:10px;letter-spacing:3px;color:var(--crim2);font-weight:700;margin-bottom:6px}
 #answer{resize:vertical;min-height:120px}
+.answer-row{display:flex;gap:8px;align-items:flex-start}
+.answer-row #answer{flex:1}
+.mic{font-size:20px;padding:10px 14px;flex-shrink:0}
+.mic.listening{border-color:var(--crim);color:#fff;background:#e01b3c;animation:pulse 1.2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px #e01b3c44}}
+.mic-status{min-height:18px;margin-top:6px}
 .eval{margin-top:16px;border:1px solid var(--line);border-radius:12px;padding:16px;background:#100c0e}.eval-head{display:flex;gap:14px}.ring{width:64px;height:64px;border-radius:50%;border:4px solid var(--crim);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;flex-shrink:0}
 .eval ul,.panel ul{padding-left:18px;margin:6px 0}.eval li,.panel li{margin:4px 0;font-size:14px}
 .rep-top{display:flex;gap:16px;align-items:center;margin:12px 0}.verdict{padding:10px 18px;border-radius:10px;font-weight:800;letter-spacing:1px}.verdict.hire{background:#052e16;color:#4ade80;border:1px solid #16a34a}.verdict.nohire{background:#450a0a;color:#fca5a5;border:1px solid var(--crim)}

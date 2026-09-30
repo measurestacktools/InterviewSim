@@ -72,6 +72,14 @@ def test_answer_too_long():
     assert "too long" in r.json()["error"].lower()
 
 
+def test_answer_at_max_length_passes_length_check():
+    # 2000 chars (e.g. long voice transcript) must NOT trip the length guard;
+    # without an active interview it fails later with "no active".
+    r = client.post("/api/answer", json={"answer": "x" * 2000})
+    assert r.status_code == 400
+    assert "too long" not in r.json()["error"].lower()
+
+
 def test_report_without_start():
     r = client.post("/api/report")
     assert r.status_code == 400

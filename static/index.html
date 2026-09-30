@@ -21,7 +21,7 @@
   <section id="setupScreen" class="panel">
     <div class="kicker">INTERVIEW STAGE · SETUP</div>
     <h1>Configure your mock interview</h1>
-    <p class="sub">Real AI interviewer (Groq <code>openai/gpt-oss-120b</code>). Text answers only — voice is a known limitation.</p>
+    <p class="sub">Real AI interviewer (Groq <code>openai/gpt-oss-120b</code>). Type your answers, or tap 🎤 to dictate (free browser speech recognition, Chrome/Edge).</p>
     <div class="grid2">
       <label>Topic
         <select id="topic">
@@ -56,7 +56,11 @@
     </div>
     <div class="bar"><div id="barFill"></div></div>
     <div class="qcard"><div class="qkicker">QUESTION</div><div id="question">…</div></div>
-    <textarea id="answer" maxlength="2000" rows="6" placeholder="Type your answer here (max 2000 chars)…"></textarea>
+    <div class="answer-row">
+      <textarea id="answer" maxlength="2000" rows="6" placeholder="Type your answer here (max 2000 chars)…"></textarea>
+      <button id="micBtn" class="btn ghost mic" title="Dictate via microphone (Chrome/Edge)">🎤</button>
+    </div>
+    <div id="micStatus" class="dim mic-status" aria-live="polite"></div>
     <div class="row between">
       <span id="charCount" class="dim">0 / 2000</span>
       <div class="row">
@@ -117,7 +121,7 @@
   </div>
 </div>
 
-<footer class="foot">InterviewSim · port 8009 · model openai/gpt-oss-120b via Groq · text-only</footer>
+<footer class="foot">InterviewSim · port 8009 · model openai/gpt-oss-120b via Groq · text + optional voice dictation</footer>
 <script src="/static/app.js"></script>
 </body>
 </html>
