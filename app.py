@@ -35,6 +35,12 @@ MAX_CV_CHARS = 20000  # stored-text cap for CV uploads
 app = FastAPI(title="AI Interview Simulator")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    """Serve the app icon so browsers never 404 on /favicon.ico."""
+    return FileResponse(os.path.join(STATIC_DIR, "favicon.svg"), media_type="image/svg+xml")
+
+
 # ---- in-memory state ----
 _session_key: Optional[str] = None  # settings-modal key (session memory only)
 
