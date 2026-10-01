@@ -1,5 +1,6 @@
 const $ = id => document.getElementById(id);
 let count = 3, total = 3, qNum = 1, timerSec = 0, timerInt = null, pendingNext = null, pendingDone = false;
+let answerStartMs = 0; // client-measured capture time per answer (for estimated WPM)
 
 function show(name){["setupScreen","interviewScreen","reportScreen"].forEach(s=>$(s).classList.toggle("hidden",s!==name));}
 function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");}
@@ -39,7 +40,9 @@ $("startBtn").onclick=async()=>{
   $("setupErr").textContent="";setBusy($("startBtn"),true,"Starting…");
   try{
     const r=await fetch("/api/start",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({topic:$("topic").value,difficulty:$("difficulty").value,count})});
+      body:JSON.stringify({topic:$("topic").value,difficulty:$("difficulty").value,count,
+        role:$("role").value||"",company:$("company").value||"",round:$("roundInput").value||"",
+        use_plan:$("usePlan").checked})});
     const j=await r.json();
     if(!r.ok||!j.ok)throw j;
     total=j.total;qNum=1;$("diffBadge").textContent=j.difficulty;$("topicBadge").textContent=j.topic;
@@ -47,6 +50,36 @@ $("startBtn").onclick=async()=>{
   }catch(e){$("setupErr").textContent=friendly(e);}
   setBusy($("startBtn"),false);
 };
+// CV upload + tailored plan (optional; quick start without CV keeps working)
+$("cvUploadBtn").onclick=async()=>{
+  const f=$("cvFile").files&&$("cvFile").files[0];
+  if(!f){$("cvStatus").textContent="Choose a .pdf or .txt file first.";return;}
+  $("cvStatus").textContent="Uploading…";setBusy($("cvUploadBtn"),true,"Uploading…");
+  try{
+    const fd=new FormData();fd.append("file",f);
+    const r=await fetch("/api/cv/upload",{method:"POST",body:fd});
+    const j=await r.json();if(!r.ok||!j.ok)throw j;
+    $("cvStatus").textContent=`CV stored: ${j.filename} (${j.chars} chars${j.truncated?", truncated":""}) · skills: ${(j.skills||[]).join(", ")||"—"}`;
+  }catch(e){$("cvStatus").textContent=friendly(e);}
+  setBusy($("cvUploadBtn"),false);
+};
+$("planBtn").onclick=async()=>{
+  $("cvStatus").textContent="Generating plan…";setBusy($("planBtn"),true,"Planning…");
+  try{
+    const r=await fetch("/api/plan",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({topic:$("topic").value,difficulty:$("difficulty").value,count,
+        role:$("role").value||"",company:$("company").value||"",round:$("roundInput").value||""})});
+    const j=await r.json();if(!r.ok||!j.ok)throw j;
+    renderPlan(j);
+    $("usePlan").checked=true;
+    $("cvStatus").textContent=`Plan ready (${j.source}${j.cv_used?", CV-tailored":""}) — review below, then Start interview.`;
+  }catch(e){$("cvStatus").textContent=friendly(e);}
+  setBusy($("planBtn"),false);
+};
+function renderPlan(j){
+  $("planList").innerHTML=(j.plan||[]).map(p=>
+    `<li><b>Q${Number(p.n)}</b> <span class="kind">${escapeHtml(p.kind||"")}</span> — ${escapeHtml(p.question||"")}</li>`).join("");
+}
 function setQuestion(q){
   qNum=q.n;$("question").textContent=q.question;
   $("progress").textContent=`Q${q.n}/${total}`;
@@ -54,7 +87,7 @@ function setQuestion(q){
   $("fuBadge").classList.toggle("hidden",!q.is_followup);
   $("evalCard").classList.add("hidden");$("nextBtn").classList.add("hidden");$("reportBtn").classList.add("hidden");
   $("answer").value="";$("charCount").textContent="0 / 2000";$("charCount").style.color="";$("answerErr").textContent="";
-  startTimer();$("answer").focus();
+  startTimer();answerStartMs=Date.now();$("answer").focus();
 }
 // answer
 $("submitBtn").onclick=async()=>{
@@ -63,8 +96,9 @@ $("submitBtn").onclick=async()=>{
   if(raw.trim().length>2000){$("answerErr").textContent=`Answer too long (${raw.trim().length} chars). Max 2000.`;return;}
   $("answerErr").textContent="";setBusy($("submitBtn"),true,"Evaluating…");
   try{
+    const duration_ms=answerStartMs?Date.now()-answerStartMs:null;
     const r=await fetch("/api/answer",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({answer:raw})});
+      body:JSON.stringify({answer:raw,duration_ms})});
     const j=await r.json();
     if(!r.ok||!j.ok)throw j;
     stopTimer();showEval(j.evaluation);
@@ -82,7 +116,16 @@ function showEval(ev){
   $("feedback").textContent=ev.feedback||"";
   $("strengths").innerHTML=(ev.strengths||[]).map(s=>`<li>${escapeHtml(s)}</li>`).join("")||"<li>—</li>";
   $("missing").innerHTML=(ev.missing||[]).map(s=>`<li>${escapeHtml(s)}</li>`).join("")||"<li>—</li>";
+  renderMiniMetrics(ev.metrics);
   $("evalCard").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function renderMiniMetrics(m){
+  const box=$("miniMetrics");if(!box)return;
+  if(!m){box.innerHTML="";return;}
+  const star=m.star||{};
+  const wpm=(m.wpm==null||m.wpm===undefined)?"WPM n/a":("~"+m.wpm+" WPM (est.)");
+  const starTxt="STAR "+(star.count||0)+"/4 (heuristic)";
+  box.innerHTML=`<span>${Number(m.words)||0} words</span><span>${Number(m.fillers)||0} fillers</span><span>${escapeHtml(wpm)}</span><span>${escapeHtml(starTxt)}</span>`;
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 $("nextBtn").onclick=()=>{if(pendingNext)setQuestion(pendingNext);};
@@ -108,6 +151,17 @@ function renderReport(j){
   $("rMissing").innerHTML=(rep.missing_concepts||[]).map(s=>`<li>${escapeHtml(s)}</li>`).join("")||"<li>—</li>";
   $("rStudy").innerHTML=(rep.study_topics||[]).map(s=>`<li>${escapeHtml(s)}</li>`).join("");
   $("rStrong").textContent=rep.stronger_answer_example||"";
+  renderSpeech(j.speech_metrics);
+}
+function renderSpeech(sm){
+  const box=$("speechBox");if(!box)return;
+  if(!sm){box.innerHTML="<span class='dim'>No delivery metrics.</span>";return;}
+  const wpm=(sm.avg_wpm==null||sm.avg_wpm===undefined)?"n/a":("~"+sm.avg_wpm+" (est.)");
+  box.innerHTML=`<span>${Number(sm.total_words)||0} words total</span>`
+    +`<span>${Number(sm.total_fillers)||0} fillers total</span>`
+    +`<span>avg WPM ${escapeHtml(wpm)}</span>`
+    +`<span>STAR coverage avg ${Number(sm.avg_star_count)||0}/4 (heuristic)</span>`
+    +`<div class="dim">${escapeHtml(sm.wpm_note||"")} · ${escapeHtml(sm.star_note||"")}</div>`;
 }
 $("copyBtn").onclick=async()=>{
   const t=`InterviewSim report — ${$("topicBadge").textContent} ${$("diffBadge").textContent}\nVerdict: ${$("verdict").textContent} | Overall: ${$("overall").textContent}/100\n${$("perQ").textContent}\nStronger answer:\n${$("rStrong").textContent}`;

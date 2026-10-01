@@ -129,5 +129,18 @@ select:focus,textarea:focus,input:focus,button:focus-visible{outline:3px solid v
 .strong{white-space:pre-wrap;background:#fff;border:2px solid var(--line);border-radius:0;padding:14px;font-size:14px;line-height:1.6;font-family:inherit}
 .modal{position:fixed;inset:0;background:rgba(17,17,17,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
 .modal-box{background:var(--paper);border:3px solid var(--line);border-radius:0;padding:22px;max-width:460px;width:100%}
+.cv-block{border-top:1px solid var(--line);margin-top:18px;padding-top:6px}
+.sub-kicker{margin-top:14px}
+.cv-status{min-height:18px;margin-top:8px}
+.plan{margin:10px 0;padding-left:22px}
+.plan li{margin:8px 0;font-size:14px;line-height:1.55}
+.plan .kind{display:inline-block;border:1px solid var(--red);color:var(--red);font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:1px 6px;margin:0 4px}
+.check{display:flex;gap:8px;align-items:center;font-size:13px}
+.check input{width:auto;margin-top:0}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chips span{border:2px solid var(--line);background:var(--paper);padding:4px 10px;font-size:12px;font-weight:700}
+.speech{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px}
+.speech span{border:2px solid var(--line);background:#fff;padding:6px 10px;font-size:13px;font-weight:700}
+.speech .dim{width:100%;border:0;background:none;padding:0;font-weight:400}
 .foot{border-top:3px solid var(--line);text-align:left;color:var(--ink-2);font-size:11px;letter-spacing:1.5px;padding:14px 22px;font-weight:700}
 @media print{.topbar,.masthead,.foot,#settingsModal,.row{display:none}.stage{max-width:100%}.panel{border:1px solid #000}}

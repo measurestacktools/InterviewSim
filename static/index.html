@@ -7,7 +7,7 @@
 <title>InterviewSim — Mock Interview, Edited</title>
 <!-- theme: swiss-editorial | off-white paper | black grotesk | signal-red accent | strict grid | numbered sections -->
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="/static/style.css?v=2">
+<link rel="stylesheet" href="/static/style.css?v=3">
 </head>
 <body>
 <header class="topbar">
@@ -48,6 +48,23 @@
       <button id="startBtn" class="btn primary" type="button">Start interview →</button>
     </div>
     <div id="setupErr" class="err" aria-live="polite"></div>
+    <div class="cv-block">
+      <div class="kicker sub-kicker"><span class="sec-no">01b</span> CV — OPTIONAL TAILORING</div>
+      <p class="sub">Upload your CV (<code>.pdf</code>/<code>.txt</code>, ≤2MB) for tailored questions. Skip for a quick generic start — existing flows keep working.</p>
+      <div class="grid2">
+        <label>Role <input id="role" placeholder="e.g. Backend Engineer" maxlength="200"></label>
+        <label>Company <input id="company" placeholder="e.g. Acme Corp" maxlength="200"></label>
+      </div>
+      <label>Round <input id="roundInput" placeholder="e.g. Technical screen" maxlength="200"></label>
+      <div class="row">
+        <input id="cvFile" type="file" accept=".pdf,.txt" aria-label="CV file (.pdf or .txt)">
+        <button id="cvUploadBtn" class="btn ghost" type="button">Upload CV</button>
+        <button id="planBtn" class="btn ghost" type="button">Generate tailored plan</button>
+      </div>
+      <div id="cvStatus" class="dim cv-status" aria-live="polite"></div>
+      <ol id="planList" class="plan"></ol>
+      <label class="check"><input id="usePlan" type="checkbox"> Use tailored plan on start</label>
+    </div>
   </section>
 
   <!-- INTERVIEW -->
@@ -83,6 +100,7 @@
         <div><h4>Strengths</h4><ul id="strengths"></ul></div>
         <div><h4>Missing</h4><ul id="missing"></ul></div>
       </div>
+      <div id="miniMetrics" class="chips" aria-live="polite"></div>
       <div class="row"><button id="nextBtn" class="btn primary hidden" type="button">Next question →</button>
       <button id="reportBtn" class="btn primary hidden" type="button">Get final report →</button></div>
     </div>
@@ -97,6 +115,8 @@
       <div class="overall"><span id="overall">–</span><small>overall / 100</small></div>
     </div>
     <div id="perQ" class="perq"></div>
+    <h4>Delivery metrics (speech)</h4>
+    <div id="speechBox" class="speech"></div>
     <div class="grid2">
       <div><h4>Concepts demonstrated</h4><ul id="rConcepts"></ul></div>
       <div><h4>Missing concepts</h4><ul id="rMissing"></ul></div>
@@ -129,6 +149,6 @@
 </div>
 
 <footer class="foot">InterviewSim · Swiss editorial edition · port 8009 · model openai/gpt-oss-120b via Groq · text + optional voice dictation</footer>
-<script src="/static/app.js?v=2"></script>
+<script src="/static/app.js?v=3"></script></script>
 </body>
 </html>
