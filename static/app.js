@@ -6,6 +6,7 @@ function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60)
 function startTimer(){stopTimer();timerSec=0;$("timer").textContent="00:00";timerInt=setInterval(()=>{timerSec++;$("timer").textContent=fmt(timerSec);},1000);}
 function stopTimer(){if(timerInt)clearInterval(timerInt);timerInt=null;}
 function friendly(e){return (e && e.error) || "Request failed. Check server / Groq status.";}
+function setBusy(btn,busy,idle){if(!btn)return;btn.disabled=!!busy;if(busy){btn.dataset.idle=btn.textContent;btn.textContent=idle||"Working…";}else if(btn.dataset.idle){btn.textContent=btn.dataset.idle;delete btn.dataset.idle;}}
 
 async function refreshStatus(){
   try{
@@ -26,9 +27,16 @@ document.querySelectorAll("#countSeg button").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("#countSeg button").forEach(x=>x.classList.remove("on"));
   b.classList.add("on"); count=parseInt(b.dataset.n,10);
 });
-$("answer").addEventListener("input",()=>{$("charCount").textContent=$("answer").value.length+" / 2000";});
+$("answer").addEventListener("input",()=>{
+  const n=$("answer").value.length;
+  $("charCount").textContent=n+" / 2000";
+  $("charCount").style.color=n>2000?"#e30613":"";
+});
+$("answer").addEventListener("keydown",(e)=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();$("submitBtn").click();}
+});
 $("startBtn").onclick=async()=>{
-  $("setupErr").textContent="";$("startBtn").disabled=true;$("startBtn").textContent="Starting…";
+  $("setupErr").textContent="";setBusy($("startBtn"),true,"Starting…");
   try{
     const r=await fetch("/api/start",{method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({topic:$("topic").value,difficulty:$("difficulty").value,count})});
@@ -37,7 +45,7 @@ $("startBtn").onclick=async()=>{
     total=j.total;qNum=1;$("diffBadge").textContent=j.difficulty;$("topicBadge").textContent=j.topic;
     setQuestion(j.current);show("interviewScreen");
   }catch(e){$("setupErr").textContent=friendly(e);}
-  $("startBtn").disabled=false;$("startBtn").textContent="▶ Start interview";
+  setBusy($("startBtn"),false);
 };
 function setQuestion(q){
   qNum=q.n;$("question").textContent=q.question;
@@ -45,15 +53,18 @@ function setQuestion(q){
   $("barFill").style.width=((q.n-1)/total*100)+"%";
   $("fuBadge").classList.toggle("hidden",!q.is_followup);
   $("evalCard").classList.add("hidden");$("nextBtn").classList.add("hidden");$("reportBtn").classList.add("hidden");
-  $("answer").value="";$("charCount").textContent="0 / 2000";$("answerErr").textContent="";
+  $("answer").value="";$("charCount").textContent="0 / 2000";$("charCount").style.color="";$("answerErr").textContent="";
   startTimer();$("answer").focus();
 }
 // answer
 $("submitBtn").onclick=async()=>{
-  $("answerErr").textContent="";$("submitBtn").disabled=true;$("submitBtn").textContent="Evaluating…";
+  const raw=$("answer").value||"";
+  if(!raw.trim()){$("answerErr").textContent="Answer is empty. Type something (max 2000 chars).";$("answer").focus();return;}
+  if(raw.trim().length>2000){$("answerErr").textContent=`Answer too long (${raw.trim().length} chars). Max 2000.`;return;}
+  $("answerErr").textContent="";setBusy($("submitBtn"),true,"Evaluating…");
   try{
     const r=await fetch("/api/answer",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({answer:$("answer").value})});
+      body:JSON.stringify({answer:raw})});
     const j=await r.json();
     if(!r.ok||!j.ok)throw j;
     stopTimer();showEval(j.evaluation);
@@ -62,12 +73,12 @@ $("submitBtn").onclick=async()=>{
     $("nextBtn").classList.toggle("hidden",!(!j.done&&j.next));
     $("reportBtn").classList.toggle("hidden",!j.done);
   }catch(e){$("answerErr").textContent=friendly(e);}
-  $("submitBtn").disabled=false;$("submitBtn").textContent="Submit answer";
+  setBusy($("submitBtn"),false);
 };
 function showEval(ev){
   $("evalCard").classList.remove("hidden");
   const ring=$("scoreRing");ring.textContent=ev.score;
-  ring.style.borderColor=ev.score>=70?"#22c55e":ev.score>=45?"#f5b301":"#e01b3c";
+  ring.style.borderColor=ev.score>=70?"#0d7a3f":ev.score>=45?"#9a6a00":"#e30613";
   $("feedback").textContent=ev.feedback||"";
   $("strengths").innerHTML=(ev.strengths||[]).map(s=>`<li>${escapeHtml(s)}</li>`).join("")||"<li>—</li>";
   $("missing").innerHTML=(ev.missing||[]).map(s=>`<li>${escapeHtml(s)}</li>`).join("")||"<li>—</li>";
@@ -83,7 +94,7 @@ async function fetchReport(url){
     const r=await fetch(url,{method:"POST"});const j=await r.json();
     if(!r.ok||!j.ok)throw j;
     if(!j.report){alert(j.message||"Quit with no report.");location.reload();return;}
-    renderReport(j);show("reportScreen");stopTimer();
+    renderReport(j);show("reportScreen");stopTimer();window.scrollTo(0,0);
   }catch(e){$("answerErr").textContent=friendly(e);}
 }
 function renderReport(j){
@@ -92,25 +103,39 @@ function renderReport(j){
   const v=$("verdict");v.textContent=rep.verdict;
   v.className="verdict "+(rep.verdict==="HIRE"?"hire":"nohire");
   $("overall").textContent=rep.overall;
-  $("perQ").innerHTML=(rep.per_question||[]).map(p=>`<span>Q${p.n}: <b>${p.score}</b></span>`).join("");
+  $("perQ").innerHTML=(rep.per_question||[]).map(p=>`<span>Q${Number(p.n)}: <b>${Number(p.score)}</b></span>`).join("");
   $("rConcepts").innerHTML=(rep.concepts_demonstrated||[]).map(s=>`<li>${escapeHtml(s)}</li>`).join("")||"<li>—</li>";
   $("rMissing").innerHTML=(rep.missing_concepts||[]).map(s=>`<li>${escapeHtml(s)}</li>`).join("")||"<li>—</li>";
   $("rStudy").innerHTML=(rep.study_topics||[]).map(s=>`<li>${escapeHtml(s)}</li>`).join("");
   $("rStrong").textContent=rep.stronger_answer_example||"";
 }
-$("copyBtn").onclick=()=>{
+$("copyBtn").onclick=async()=>{
   const t=`InterviewSim report — ${$("topicBadge").textContent} ${$("diffBadge").textContent}\nVerdict: ${$("verdict").textContent} | Overall: ${$("overall").textContent}/100\n${$("perQ").textContent}\nStronger answer:\n${$("rStrong").textContent}`;
-  navigator.clipboard.writeText(t).then(()=>alert("Report copied."));
+  try{
+    await navigator.clipboard.writeText(t);
+    alert("Report copied.");
+  }catch{
+    try{
+      const ta=document.createElement("textarea");
+      ta.value=t;document.body.appendChild(ta);ta.select();
+      document.execCommand("copy");ta.remove();
+      alert("Report copied.");
+    }catch{alert("Copy failed — select the report text manually.");}
+  }
 };
 $("printBtn").onclick=()=>window.print();
 $("restartBtn").onclick=()=>location.reload();
 // settings
-$("settingsBtn").onclick=()=>{$("settingsModal").classList.remove("hidden");$("keyMsg").textContent="";refreshKeyState();};
+$("settingsBtn").onclick=()=>{$("settingsModal").classList.remove("hidden");$("keyMsg").textContent="";refreshKeyState();$("keyInput").focus();};
 $("closeSettingsBtn").onclick=()=>$("settingsModal").classList.add("hidden");
+$("settingsModal").addEventListener("click",(e)=>{if(e.target===$("settingsModal"))$("settingsModal").classList.add("hidden");});
+document.addEventListener("keydown",(e)=>{if(e.key==="Escape")$("settingsModal").classList.add("hidden");});
 $("saveKeyBtn").onclick=async()=>{
+  const v=($("keyInput").value||"").trim();
+  if(!v){$("keyMsg").textContent="Paste a key first.";return;}
   $("keyMsg").textContent="Verifying via models.list…";
   try{
-    const r=await fetch("/api/key",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({key:$("keyInput").value})});
+    const r=await fetch("/api/key",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({key:v})});
     const j=await r.json();if(!r.ok||!j.ok)throw j;
     $("keyMsg").textContent="Key verified & saved (session memory).";$("keyInput").value="";
     refreshStatus();refreshKeyState();
@@ -129,7 +154,8 @@ refreshStatus();setInterval(refreshStatus,30000);
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   let rec=null, listening=false, baseText="", finalText="";
   function setStatus(t){micStatus.textContent=t||"";}
-  function setBtn(){micBtn.textContent=listening?"⏺":"🎤";micBtn.classList.toggle("listening",listening);}
+  function setBtn(){micBtn.textContent=listening?"STOP":"MIC";micBtn.classList.toggle("listening",listening);}
+  setBtn();
   function updateCount(){ans.dispatchEvent(new Event("input"));}
   function combined(finalPart,interimPart){
     const add=(finalPart+" "+interimPart).trim();
@@ -148,7 +174,7 @@ refreshStatus();setInterval(refreshStatus,30000);
       rec=new SR();
     }catch{setStatus("Could not start voice input — please type instead.");return;}
     rec.lang="en-US";rec.interimResults=true;rec.continuous=true;rec.maxAlternatives=1;
-    listening=true;setBtn();setStatus("Listening… speak now. Tap ⏺ again to stop.");
+    listening=true;setBtn();setStatus("Listening… speak now. Tap STOP again to stop.");
     rec.onresult=e=>{
       let interim="";
       for(let i=e.resultIndex;i<e.results.length;i++){

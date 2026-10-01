@@ -337,11 +337,14 @@ def start(body: StartReq):
         return JSONResponse({"ok": False, "error": f"Bad topic. Choose one of: {', '.join(TOPICS)}."}, status_code=400)
     if difficulty not in DIFFICULTIES:
         return JSONResponse({"ok": False, "error": f"Bad difficulty. Choose one of: {', '.join(DIFFICULTIES)}."}, status_code=400)
-    try:
-        count = int(count)  # type: ignore
-    except Exception:
+    if isinstance(count, bool):
         return JSONResponse({"ok": False, "error": "Bad question count. Choose 3, 5, or 8."}, status_code=400)
-    if count not in COUNTS:
+    if isinstance(count, str):
+        s = count.strip()
+        if not s.isdigit():
+            return JSONResponse({"ok": False, "error": "Bad question count. Choose 3, 5, or 8."}, status_code=400)
+        count = int(s)
+    if not isinstance(count, int) or count not in COUNTS:
         return JSONResponse({"ok": False, "error": "Bad question count. Choose 3, 5, or 8."}, status_code=400)
     if not get_api_key():
         return JSONResponse({"ok": False, "error": "No Groq API key configured. Open Settings and paste a key, or set GROQ_API_KEY in .env."}, status_code=400)
@@ -371,8 +374,8 @@ def answer(body: AnswerReq):
     ans = body.answer if isinstance(body.answer, str) else ""
     if not ans.strip():
         return JSONResponse({"ok": False, "error": "Answer is empty. Type something (max 2000 chars)."}, status_code=400)
-    if len(ans) > MAX_ANSWER:
-        return JSONResponse({"ok": False, "error": f"Answer too long ({len(ans)} chars). Max {MAX_ANSWER}."}, status_code=400)
+    if len(ans.strip()) > MAX_ANSWER:
+        return JSONResponse({"ok": False, "error": f"Answer too long ({len(ans.strip())} chars). Max {MAX_ANSWER}."}, status_code=400)
     if not interview["active"] or interview["current"] is None:
         if interview.get("last_report") and interview.get("finished"):
             return JSONResponse({"ok": False, "error": "Interview is finished. Request a report or start a new interview."}, status_code=400)
