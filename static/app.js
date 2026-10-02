@@ -31,7 +31,7 @@ document.querySelectorAll("#countSeg button").forEach(b=>b.onclick=()=>{
 $("answer").addEventListener("input",()=>{
   const n=$("answer").value.length;
   $("charCount").textContent=n+" / 2000";
-  $("charCount").style.color=n>2000?"#e30613":"";
+   $("charCount").style.color=n>2000?"#7a2e1d":"";
 });
 $("answer").addEventListener("keydown",(e)=>{
   if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();$("submitBtn").click();}
@@ -112,7 +112,7 @@ $("submitBtn").onclick=async()=>{
 function showEval(ev){
   $("evalCard").classList.remove("hidden");
   const ring=$("scoreRing");ring.textContent=ev.score;
-  ring.style.borderColor=ev.score>=70?"#0d7a3f":ev.score>=45?"#9a6a00":"#e30613";
+   ring.style.borderColor=ev.score>=70?"#1f4d2e":ev.score>=45?"#8a6d2c":"#7a2e1d";
   $("feedback").textContent=ev.feedback||"";
   $("strengths").innerHTML=(ev.strengths||[]).map(s=>`<li>${escapeHtml(s)}</li>`).join("")||"<li>—</li>";
   $("missing").innerHTML=(ev.missing||[]).map(s=>`<li>${escapeHtml(s)}</li>`).join("")||"<li>—</li>";

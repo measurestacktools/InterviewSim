@@ -1,75 +1,75 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="swiss-editorial">
+<html lang="en" data-theme="executive-boardroom">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme" content="swiss-editorial off-white-paper black-grotesk signal-red grid numbered-sections tabular-numerals">
-<title>InterviewSim — Mock Interview, Edited</title>
-<!-- theme: swiss-editorial | off-white paper | black grotesk | signal-red accent | strict grid | numbered sections -->
+<meta name="theme" content="executive-boardroom walnut brass bankers-green cream-paper georgia-serif">
+<title>InterviewSim — The Board Will See You Now</title>
+<!-- theme: executive-boardroom | deep walnut | solid brass nameplates | banker's-lamp green | cream paper | Georgia serif -->
 <link rel="icon" href="/favicon.ico" />
-<link rel="stylesheet" href="/static/style.css?v=3">
+<link rel="stylesheet" href="/static/style.css?v=4">
 </head>
 <body>
 <header class="topbar">
-  <div class="brand"><span class="rule-no">N°09</span> InterviewSim <span class="sub-brand">— Mock Interview Journal</span></div>
+  <div class="brand"><span class="rule-no">Suite 8009</span> InterviewSim <span class="sub-brand">— Executive Boardroom</span></div>
   <div class="top-right">
     <span id="statusPill" class="pill off" title="Groq key status">● checking…</span>
-    <button id="settingsBtn" class="btn ghost">Settings</button>
+    <button id="settingsBtn" class="btn ghost" type="button">Settings</button>
   </div>
 </header>
 <div class="masthead">
-  <span>SWISS EDITORIAL EDITION</span><span>TOPIC / LEVEL / VERDICT</span><span>PORT 8009</span>
+  <span>EXECUTIVE BOARDROOM EDITION</span><span>TAKE YOUR SEAT AT THE HEAD OF THE TABLE</span><span>BY APPOINTMENT ONLY</span>
 </div>
 
 <main class="stage">
   <!-- SETUP -->
   <section id="setupScreen" class="panel">
-    <div class="kicker"><span class="sec-no">01</span> SETUP — CONFIGURE</div>
-    <h1>Configure your mock interview</h1>
-    <p class="sub">Real AI interviewer (Groq <code>openai/gpt-oss-120b</code>). Type your answers, or tap the mic to dictate (free browser speech recognition, Chrome/Edge).</p>
+    <div class="kicker"><span class="sec-no">I</span> The Brief — Convene the Meeting</div>
+    <h1>THE BOARD WILL SEE YOU NOW</h1>
+    <p class="sub">You have been called into the boardroom. A senior panel — powered by Groq <code>openai/gpt-oss-120b</code> — is waiting behind closed doors. State your brief, lay your record on the table, and take your seat. Type your answers, or dictate into the record with the mic (free browser speech recognition, Chrome/Edge).</p>
     <div class="grid2">
-      <label>Topic
+      <label>Topic — Matter Before the Board
         <select id="topic">
           <option>Python</option><option>JavaScript</option><option>Java</option>
           <option>C++</option><option>React</option><option>AI-ML</option>
           <option>SQL</option><option>DSA</option><option>General</option>
         </select>
       </label>
-      <label>Difficulty
+      <label>Seniority — Weight of the Chair
         <select id="difficulty"><option>Junior</option><option>Mid</option><option>Senior</option></select>
       </label>
     </div>
-    <label>Questions
+    <label>Length of Proceedings
       <div class="seg" id="countSeg" role="group" aria-label="Question count">
         <button data-n="3" class="on" type="button">3</button><button data-n="5" type="button">5</button><button data-n="8" type="button">8</button>
       </div>
     </label>
     <div class="row">
-      <button id="startBtn" class="btn primary" type="button">Start interview →</button>
+      <button id="startBtn" class="btn primary" type="button">Enter the boardroom →</button>
     </div>
     <div id="setupErr" class="err" aria-live="polite"></div>
     <div class="cv-block">
-      <div class="kicker sub-kicker"><span class="sec-no">01b</span> CV — OPTIONAL TAILORING</div>
-      <p class="sub">Upload your CV (<code>.pdf</code>/<code>.txt</code>, ≤2MB) for tailored questions. Skip for a quick generic start — existing flows keep working.</p>
+      <div class="kicker sub-kicker"><span class="sec-no">Ib</span> Your Record — Dossier (Optional)</div>
+      <p class="sub">Place your dossier on the table (<code>.pdf</code>/<code>.txt</code>, ≤2MB) and the chair will tailor the proceedings to your record. Or walk in cold for a brisk general session — both doors are open.</p>
       <div class="grid2">
-        <label>Role <input id="role" placeholder="e.g. Backend Engineer" maxlength="200"></label>
-        <label>Company <input id="company" placeholder="e.g. Acme Corp" maxlength="200"></label>
+        <label>Office Sought <input id="role" placeholder="e.g. Backend Engineer" maxlength="200"></label>
+        <label>The Firm <input id="company" placeholder="e.g. Acme Corp" maxlength="200"></label>
       </div>
-      <label>Round <input id="roundInput" placeholder="e.g. Technical screen" maxlength="200"></label>
+      <label>Hearing <input id="roundInput" placeholder="e.g. Technical screen" maxlength="200"></label>
       <div class="row">
         <input id="cvFile" type="file" accept=".pdf,.txt" aria-label="CV file (.pdf or .txt)">
-        <button id="cvUploadBtn" class="btn ghost" type="button">Upload CV</button>
-        <button id="planBtn" class="btn ghost" type="button">Generate tailored plan</button>
+        <button id="cvUploadBtn" class="btn ghost" type="button">File the dossier</button>
+        <button id="planBtn" class="btn ghost" type="button">Draft the agenda</button>
       </div>
       <div id="cvStatus" class="dim cv-status" aria-live="polite"></div>
       <ol id="planList" class="plan"></ol>
-      <label class="check"><input id="usePlan" type="checkbox"> Use tailored plan on start</label>
+      <label class="check"><input id="usePlan" type="checkbox"> Open with the tailored agenda</label>
     </div>
   </section>
 
   <!-- INTERVIEW -->
   <section id="interviewScreen" class="panel hidden">
-    <div class="kicker"><span class="sec-no">02</span> INTERVIEW — ANSWER</div>
+    <div class="kicker"><span class="sec-no">II</span> In Session — The Chair Recognizes You</div>
     <div class="meta-row">
       <span id="progress" class="progress">Q1/3</span>
       <span id="diffBadge" class="badge">Junior</span>
@@ -78,55 +78,55 @@
       <span id="fuBadge" class="badge fu hidden">FOLLOW-UP</span>
     </div>
     <div class="bar" aria-hidden="true"><div id="barFill"></div></div>
-    <div class="qcard"><div class="qkicker">QUESTION</div><div id="question">…</div></div>
+    <div class="qcard"><div class="qkicker">FROM THE CHAIR</div><div id="question">…</div></div>
     <div class="answer-row">
-      <textarea id="answer" maxlength="2000" rows="6" placeholder="Type your answer here (max 2000 chars)… Ctrl+Enter submits."></textarea>
+      <textarea id="answer" maxlength="2000" rows="6" placeholder="Address the board here (max 2000 chars)… Ctrl+Enter puts it on the record."></textarea>
       <button id="micBtn" class="btn ghost mic" title="Dictate via microphone (Chrome/Edge)" type="button">Mic</button>
     </div>
     <div id="micStatus" class="dim mic-status" aria-live="polite"></div>
     <div class="row between">
       <span id="charCount" class="dim">0 / 2000</span>
       <div class="row tight">
-        <button id="quitBtn" class="btn danger-ghost" type="button">Quit (partial report)</button>
-        <button id="submitBtn" class="btn primary" type="button">Submit answer</button>
+        <button id="quitBtn" class="btn danger-ghost" type="button">Adjourn (partial minutes)</button>
+        <button id="submitBtn" class="btn primary" type="button">Put it on the record</button>
       </div>
     </div>
     <div id="answerErr" class="err" aria-live="polite"></div>
     <div id="evalCard" class="eval hidden">
       <div class="eval-head"><div id="scoreRing" class="ring">–</div>
-        <div><div class="ekicker">EVALUATION</div><div id="feedback"></div></div>
+        <div><div class="ekicker">THE PANEL DELIBERATES</div><div id="feedback"></div></div>
       </div>
       <div class="grid2">
-        <div><h4>Strengths</h4><ul id="strengths"></ul></div>
-        <div><h4>Missing</h4><ul id="missing"></ul></div>
+        <div><h4>Carried weight</h4><ul id="strengths"></ul></div>
+        <div><h4>Left on the table</h4><ul id="missing"></ul></div>
       </div>
       <div id="miniMetrics" class="chips" aria-live="polite"></div>
-      <div class="row"><button id="nextBtn" class="btn primary hidden" type="button">Next question →</button>
-      <button id="reportBtn" class="btn primary hidden" type="button">Get final report →</button></div>
+      <div class="row"><button id="nextBtn" class="btn primary hidden" type="button">Next matter →</button>
+      <button id="reportBtn" class="btn primary hidden" type="button">Call for the decision →</button></div>
     </div>
   </section>
 
   <!-- REPORT -->
   <section id="reportScreen" class="panel hidden">
-    <div class="kicker"><span class="sec-no">03</span> REPORT — PANEL DECISION</div>
-    <h1>Interview report <span id="partialTag" class="badge dim hidden">PARTIAL</span></h1>
+    <div class="kicker"><span class="sec-no">III</span> Minutes — Decision of the Board</div>
+    <h1>Minutes of the meeting <span id="partialTag" class="badge dim hidden">PARTIAL</span></h1>
     <div class="rep-top">
       <div id="verdict" class="verdict">–</div>
-      <div class="overall"><span id="overall">–</span><small>overall / 100</small></div>
+      <div class="overall"><span id="overall">–</span><small>standing / 100</small></div>
     </div>
     <div id="perQ" class="perq"></div>
-    <h4>Delivery metrics (speech)</h4>
+    <h4>Command of the room (delivery)</h4>
     <div id="speechBox" class="speech"></div>
     <div class="grid2">
-      <div><h4>Concepts demonstrated</h4><ul id="rConcepts"></ul></div>
-      <div><h4>Missing concepts</h4><ul id="rMissing"></ul></div>
+      <div><h4>Authority shown</h4><ul id="rConcepts"></ul></div>
+      <div><h4>Authority wanting</h4><ul id="rMissing"></ul></div>
     </div>
-    <h4>Study topics</h4><ul id="rStudy"></ul>
-    <h4>Stronger answer example</h4><pre id="rStrong" class="strong"></pre>
+    <h4>Brief for next session</h4><ul id="rStudy"></ul>
+    <h4>The answer that would have closed the room</h4><pre id="rStrong" class="strong"></pre>
     <div class="row">
-      <button id="copyBtn" class="btn ghost" type="button">Copy report</button>
+      <button id="copyBtn" class="btn ghost" type="button">Copy the minutes</button>
       <button id="printBtn" class="btn ghost" type="button">Print</button>
-      <button id="restartBtn" class="btn primary" type="button">New interview ↺</button>
+      <button id="restartBtn" class="btn primary" type="button">Request another hearing ↺</button>
     </div>
   </section>
 </main>
@@ -134,9 +134,9 @@
 <!-- SETTINGS MODAL -->
 <div id="settingsModal" class="modal hidden">
   <div class="modal-box">
-    <div class="kicker"><span class="sec-no">§</span> SETTINGS</div>
+    <div class="kicker"><span class="sec-no">§</span> Clerk's Office — Settings</div>
     <h3>Groq API key</h3>
-    <p class="sub">Stored in server session memory only. Falls back to <code>.env</code> (<code>GROQ_API_KEY</code>). Verified via <code>models.list</code>.</p>
+    <p class="sub">Held in server session memory only. Falls back to <code>.env</code> (<code>GROQ_API_KEY</code>). Verified via <code>models.list</code>.</p>
     <input id="keyInput" type="password" placeholder="gsk_…" autocomplete="off">
     <div class="row">
       <button id="saveKeyBtn" class="btn primary" type="button">Verify &amp; save</button>
@@ -148,7 +148,7 @@
   </div>
 </div>
 
-<footer class="foot">InterviewSim · Swiss editorial edition · port 8009 · model openai/gpt-oss-120b via Groq · text + optional voice dictation</footer>
-<script src="/static/app.js?v=3"></script></script>
+<footer class="foot">InterviewSim · Executive Boardroom edition · port 8009 · model openai/gpt-oss-120b via Groq · text + optional voice dictation</footer>
+<script src="/static/app.js?v=4"></script>
 </body>
 </html>
